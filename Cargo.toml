@@ -1,0 +1,13 @@
+[package]
+name = "dotm"
+version = "0.1.0"
+edition = "2021"
+description = "Manage your dotfiles via the terminal"
+
+[dependencies]
+clap = { version = "4.0.32", features = ["derive", "cargo"] }
+thiserror = "1.0.40"
+anyhow = "1.0.71"
+config = "0.13.3"
+gix = "0.44.1"
+xdg = "2.5.0"
