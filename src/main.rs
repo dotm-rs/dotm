@@ -6,6 +6,8 @@ use crate::cli::{Cli, Commands};
 mod cli;
 mod cmds;
 mod config;
+mod constants;
+mod hint;
 
 fn main() -> Result<()> {
     let cli = Cli::parse();

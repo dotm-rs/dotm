@@ -61,6 +61,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "atty"
+version = "0.2.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d9b39be18770d11421cdb1b9947a45dd3f37e93092cbf377614828a319d5fee8"
+dependencies = [
+ "hermit-abi 0.1.19",
+ "libc",
+ "winapi",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -174,6 +185,17 @@ name = "clru"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b8191fa7302e03607ff0e237d4246cc043ff5b3cb9409d995172ba3bea16b807"
+
+[[package]]
+name = "colored"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b3616f750b84d8f0de8a58bda93e08e2a81ad3f523089b05f1dffecab48c6cbd"
+dependencies = [
+ "atty",
+ "lazy_static",
+ "winapi",
+]
 
 [[package]]
 name = "config"
@@ -311,6 +333,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "colored",
  "config",
  "gix",
  "thiserror",
@@ -449,6 +472,7 @@ dependencies = [
  "gix-pack",
  "gix-path",
  "gix-prompt",
+ "gix-protocol",
  "gix-ref",
  "gix-refspec",
  "gix-revision",
@@ -795,6 +819,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "gix-packetline"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "51f53abaf1171d2fe99f80ac8ed6645904a1bfd706674749ac112bdd2d4f0777"
+dependencies = [
+ "bstr",
+ "hex",
+ "thiserror",
+]
+
+[[package]]
 name = "gix-path"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -816,6 +851,23 @@ dependencies = [
  "gix-config-value",
  "parking_lot",
  "rustix 0.37.18",
+ "thiserror",
+]
+
+[[package]]
+name = "gix-protocol"
+version = "0.32.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "877e49417f1730f4dbc2f7d9a2ab0f8b2f49ef08f97270691403ecde3d961e3a"
+dependencies = [
+ "bstr",
+ "btoi",
+ "gix-credentials",
+ "gix-features",
+ "gix-hash",
+ "gix-transport",
+ "maybe-async",
+ "nom",
  "thiserror",
 ]
 
@@ -906,6 +958,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "gix-transport"
+version = "0.31.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f01c2bf7b989c679695ef635fc7d9e80072e08101be4b53193c8e8b649900102"
+dependencies = [
+ "bstr",
+ "gix-command",
+ "gix-features",
+ "gix-packetline",
+ "gix-quote",
+ "gix-sec",
+ "gix-url",
+ "thiserror",
+]
+
+[[package]]
 name = "gix-traverse"
 version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -991,6 +1059,15 @@ name = "heck"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2540771e65fc8cb83cd6e8a237f70c319bd5c29f78ed1084ba5d50eeac86f7f9"
+
+[[package]]
+name = "hermit-abi"
+version = "0.1.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62b467343b94ba476dcb2500d242dadbb39557df889310ac77c5d99100aaac33"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "hermit-abi"
@@ -1173,6 +1250,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "maybe-async"
+version = "0.2.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0f1b8c13cb1f814b634a96b2c725449fe7ed464a7b8781de8688be5ffbd3f305"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.107",
 ]
 
 [[package]]

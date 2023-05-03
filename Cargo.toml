@@ -5,9 +5,10 @@ edition = "2021"
 description = "Manage your dotfiles via the terminal"
 
 [dependencies]
+gix = { version = "0.44.1", features = ["blocking-network-client"] }
 clap = { version = "4.0.32", features = ["derive", "cargo"] }
 thiserror = "1.0.40"
+colored = "2.0.0"
 anyhow = "1.0.71"
 config = "0.13.3"
-gix = "0.44.1"
 xdg = "2.5.0"
