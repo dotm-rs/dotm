@@ -5,7 +5,12 @@ use colored::Colorize;
 use thiserror::Error;
 use xdg::BaseDirectoriesError;
 
-use crate::{constants::XDG_PREFIX, hint::Hint};
+use crate::{
+    config::Config,
+    constants::XDG_PREFIX,
+    git::{self, GitCloneError},
+    hint::Hint,
+};
 
 #[derive(Debug, Args)]
 pub struct InitArgs {
@@ -29,17 +34,8 @@ pub enum InitCmdError {
     #[error("profile already exists")]
     ProfileAlreadyPresent,
 
-    #[error("url parse error: {0}")]
-    UrlParseError(#[from] gix::url::parse::Error),
-
-    #[error("clone error: {0}")]
-    CloneError(#[from] gix::clone::Error),
-
-    #[error("fetch error: {0}")]
-    FetchError(#[from] gix::clone::fetch::Error),
-
-    #[error("checkout error: {0}")]
-    CheckoutError(#[from] gix::clone::checkout::main_worktree::Error),
+    #[error("error while cloning: {0}")]
+    GitCloneError(#[from] GitCloneError),
 
     #[error("init error: {0}")]
     InitError(#[from] gix::init::Error),
@@ -47,8 +43,6 @@ pub enum InitCmdError {
 
 impl InitArgs {
     pub fn run(&self) -> Result<(), InitCmdError> {
-        println!("Initializing using profile {}", self.profile.green());
-
         let base_data_dir = xdg::BaseDirectories::with_prefix(XDG_PREFIX)?.get_data_home();
         let profile_dir = base_data_dir.join(&self.profile);
         let git_dir = base_data_dir.join(".git");
@@ -63,35 +57,43 @@ impl InitArgs {
             fs::create_dir_all(&profile_dir)?;
         } else {
             let hint = Hint::builder()
-                .with_title("Profile already exists")
+                .with_title(format!("Profile \"{}\" already exists", &self.profile))
+                .with_before_text("It seems like the selected profile already exists. To continue, use any of the following commands:")
                 .with_items(vec![
-                    "Use \"dotm init (URL) --profile <PROFILE>\" to create a new profile".into(),
-                    format!("Use \"dotm profile remove {}\" to remove the profile. Caution - This will delete all files associated with the profile!", &self.profile)
-                ]);
+                    format!(
+                        "Use \"{}\" to create a new profile",
+                        "dotm init (URL) --profile <PROFILE>".bright_blue()
+                    ),
+                    format!(
+                        "Use \"{}\" to remove the profile",
+                        format!("dotm profile remove {}", &self.profile).bright_blue()
+                    ),
+                ])
+                .build();
 
+            println!("{hint}");
             return Err(InitCmdError::ProfileAlreadyPresent);
         }
 
-        match &self.repo {
-            Some(url) => {
-                // If the user provided a remote URL, init will clone and checkout the repository
-                gix::interrupt::init_handler(|| {})?;
-                let url = gix::url::parse(url.as_bytes().into())?;
+        println!("Initializing using profile {}", self.profile.green());
 
-                // Cloning
-                let mut clone = gix::prepare_clone(url, git_dir)?;
-                let (mut checkout, _) = clone
-                    .fetch_then_checkout(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)?;
-
-                // Checkout
-                let (repo, _) = checkout
-                    .main_worktree(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)?;
-            }
+        let repo = match &self.repo {
+            Some(url) => git::clone_repository(&url, git_dir)?,
             None => {
                 // If the user didn't provide a remote URL, init will only create a bare repository
                 let repo = gix::init_bare(git_dir)?;
+
+                // Next create the config file
+                let config = Config {
+                    profile: self.profile.clone(),
+                    profiles: vec![self.profile.clone()],
+                };
+
+                config.create_if_needed()?;
+
+                repo
             }
-        }
+        };
 
         Ok(())
     }

@@ -7,6 +7,7 @@ mod cli;
 mod cmds;
 mod config;
 mod constants;
+mod git;
 mod hint;
 
 fn main() -> Result<()> {
@@ -18,6 +19,7 @@ fn main() -> Result<()> {
             Commands::Sync => todo!(),
             Commands::Add => todo!(),
             Commands::Remove => todo!(),
+            Commands::Profile(args) => args.run()?,
         },
         None => todo!(),
     }

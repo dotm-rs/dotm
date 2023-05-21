@@ -1,91 +1,26 @@
 use std::fmt::Display;
 
 pub struct Hint {
-    pub title: MaxWidthString,
-    pub before_text: MaxWidthString,
-    pub after_text: MaxWidthString,
+    pub title: String,
+    pub before_text: String,
+    pub after_text: String,
     pub items: Vec<String>,
     max_width: usize,
 }
 
 impl Display for Hint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}\n\n{}", self.title, self.before_text)
-    }
-}
-
-pub struct MaxWidthString {
-    max_width: usize,
-    padding: usize,
-    output: String,
-    line: String,
-}
-
-impl MaxWidthString {
-    pub fn new(content: String, max_width: usize, padding: usize) -> Self {
-        let mut output = String::from(" ".repeat(padding));
-        let mut line = String::new();
-
-        let mut words: Vec<&str> = content.split(' ').collect();
-        words.reverse();
-
-        while let Some(word) = words.pop() {
-            if word.len() + line.len() + 1 > max_width - padding {
-                output.push_str(&line);
-                output.push('\n');
-                output.push_str(" ".repeat(padding).as_str());
-
-                line.clear();
-                words.push(word);
-
-                continue;
-            }
-
-            line.push_str(word);
-            line.push(' ');
-        }
-
-        Self {
-            max_width,
-            padding,
-            output,
-            line,
-        }
-    }
-
-    pub fn push_string(&mut self, content: String) {
-        let mut words: Vec<&str> = content.split(' ').collect();
-        words.reverse();
-
-        while let Some(word) = words.pop() {
-            if word.len() + self.line.len() + 1 > self.max_width - self.padding {
-                self.output.push_str(&self.line);
-                self.output.push('\n');
-                self.output.push_str(" ".repeat(self.padding).as_str());
-
-                self.line.clear();
-                words.push(word);
-
-                continue;
-            }
-
-            self.line.push_str(word);
-            self.line.push(' ');
-        }
-    }
-
-    fn display(&self) -> String {
-        let mut output = self.output.to_owned();
-        output.push_str(&self.line);
-
-        output
-    }
-}
-
-impl Display for MaxWidthString {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let output = self.display();
-        write!(f, "{output}")
+        write!(
+            f,
+            "{}\n\n{}{}\n",
+            self.title,
+            if self.before_text.is_empty() {
+                "".into()
+            } else {
+                format!("{}\n\n", self.before_text)
+            },
+            self.items.join("\n")
+        )
     }
 }
 
@@ -145,21 +80,16 @@ impl HintBuilder {
         self
     }
 
-    pub fn with_items(&mut self, items: Vec<String>) -> &mut Self {
-        self.items = items;
-        self
-    }
-
-    pub fn with_max_width(&mut self, max_width: usize) -> &mut Self {
-        self.max_width = max_width;
+    pub fn with_items(&mut self, items: Vec<impl Display>) -> &mut Self {
+        self.items = items.iter().map(|s| s.to_string()).collect();
         self
     }
 
     pub fn build(&self) -> Hint {
         Hint {
-            before_text: MaxWidthString::new(self.before_text.clone(), self.max_width, 2),
-            after_text: MaxWidthString::new(self.after_text.clone(), self.max_width, 2),
-            title: MaxWidthString::new(self.title.clone(), self.max_width, 0),
+            before_text: self.before_text.clone(),
+            after_text: self.after_text.clone(),
+            title: self.title.clone(),
             items: self.items.clone(),
             max_width: self.max_width,
         }
@@ -181,7 +111,6 @@ mod test {
         let hint = Hint::builder()
             .with_title("This is a super duper long test title which overflows the max width")
             .with_before_text("This appears after the title and should be indented with 2 spaces")
-            .with_max_width(50)
             .build();
 
         println!("{hint}")

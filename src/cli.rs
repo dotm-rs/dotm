@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 
-use crate::cmds::init::InitArgs;
+use crate::cmds::{init::InitArgs, profile::ProfileArgs};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -11,7 +11,7 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Initialize the dotm. This creates all necessary directories and files.
+    /// Initialize dotm. This creates all necessary directories and files.
     Init(InitArgs),
 
     /// Sync files between local machine and remote
@@ -21,5 +21,9 @@ pub enum Commands {
     Add,
 
     /// Remove one or more tracked files
+    #[command(alias("rm"))]
     Remove,
+
+    #[command(alias("pr"))]
+    Profile(ProfileArgs),
 }
